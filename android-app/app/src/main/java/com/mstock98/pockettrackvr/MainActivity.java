@@ -14,5 +14,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         btnToggleTracking = findViewById(R.id.btnToggleTracking);
+
+
     }
 }
