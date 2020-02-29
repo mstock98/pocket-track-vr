@@ -1,46 +1,76 @@
 package com.mstock98.pockettrackvr;
 
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.content.Context;
 
 import static android.content.Context.SENSOR_SERVICE;
 
 public class SensorDriver {
-    private int stepCount; // number of steps that have been taken since the start of recording
-    private final SensorManager mSensorManager;
-    private final Sensor mAccelermeter;
+    private final SensorManager _mSensorManager;
 
-    private Sensor sensor;
+    private final Sensor _mAccelerometer;
+
+    private final SensorEventListener _mAccelerometerListener;
+
+    private Sensor _sensor;
+
+    private final int SENSOR_SAMPLING_PERIOD = 8333; // 8333 microseconds ~= 120 Hz sample rate
+
+    private float[] _accelerationValues;
+    private int _stepCount; // number of steps that have been taken since the start of recording
+
+    private boolean _isRecording;
 
     /**
      * Initiates a sensor suite for measuring orientation and footfalls
      * @param mContext - State of the application. If calling from an activity, pass in "this"
      */
     public SensorDriver(Context mContext) {
-        this.mSensorManager = (SensorManager) mContext.getSystemService(SENSOR_SERVICE);
-        this.mAccelermeter = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        this._mSensorManager = (SensorManager) mContext.getSystemService(SENSOR_SERVICE);
+        this._mAccelerometer = _mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
-        stepCount = 0;
+        this._mAccelerometerListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                _accelerationValues = event.values;
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) { } // Do nothing for now, here to satisfy interface
+        };
+
+        _stepCount = 0;
+        _isRecording = false;
     }
 
     /**
      * Call this method to start monitoring sensors
      */
     public void resumeRecording() {
-        mSensorManager.registerListener(this, mAccelermeter, SensorManager.SENSOR_DELAY_NORMAL);
+        _mSensorManager.registerListener(_mAccelerometerListener, _mAccelerometer, SENSOR_SAMPLING_PERIOD);
+        _isRecording = true;
     }
 
     /**
      * Call this method when sensors aren't needed/app is minimized - to save on battery
      */
     public void pauseRecording() {
-        mSensorManager.unregisterListener(this);
+        _mSensorManager.unregisterListener(_mAccelerometerListener);
+        _isRecording = false;
     }
+
+    /**
+     * Checks if the SensorDriver is actively reading values from hardware sensors
+     * @return true if the hardware sensors are being read, false otherwise
+     */
+    public boolean isRecording() { return _isRecording; }
 
     // Returns acceleration (m/s^2) along the x, y, and z axes - respectively
     public float[] getAccelerometerData() {
-        return null;
+        return _accelerationValues;
     }
 
     // Returns rate of rotation (rad/s) along the x, y, and z axes - respectively
@@ -50,6 +80,6 @@ public class SensorDriver {
 
     // Returns number of steps that have been taken since the start of recording
     public int getStepCount() {
-        return stepCount;
+        return _stepCount;
     }
 }
