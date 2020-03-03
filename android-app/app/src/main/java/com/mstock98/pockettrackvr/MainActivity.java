@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+// Data binding? - https://www.vogella.com/tutorials/AndroidDatabinding/article.html
+
 public class MainActivity extends AppCompatActivity {
     Button btnToggleTracking;
     private SensorDriver _sensorDriver;
@@ -24,10 +26,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (_sensorDriver.isRecording()) {
                     _sensorDriver.pauseRecording();
-                    btnToggleTracking.setText("Stop Tracking");
+                    btnToggleTracking.setText("Start Tracking");
                 } else {
                     _sensorDriver.resumeRecording();
-                    btnToggleTracking.setText("Start Tracking");
+                    btnToggleTracking.setText("Stop Tracking");
                 }
             }
         });

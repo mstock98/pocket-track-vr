@@ -6,9 +6,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.content.Context;
 
+import java.util.Observable;
+
 import static android.content.Context.SENSOR_SERVICE;
 
-public class SensorDriver {
+public class SensorDriver extends Observable {
     private final SensorManager _mSensorManager;
 
     private final Sensor _mAccelerometer;
@@ -17,9 +19,13 @@ public class SensorDriver {
 
     private Sensor _sensor;
 
-    private final int SENSOR_SAMPLING_PERIOD = 8333; // 8333 microseconds ~= 120 Hz sample rate
+    private final int SENSOR_SAMPLING_PERIOD_US = 8333; // 8333 microseconds ~= 120 Hz sample rate
 
     private float[] _accelerationValues;
+    //public ObservableFloat accelerationX;
+    //public ObservableFloat accelerationY;
+    //public ObservableFloat accelerationZ;
+
     private int _stepCount; // number of steps that have been taken since the start of recording
 
     private boolean _isRecording;
@@ -36,6 +42,7 @@ public class SensorDriver {
             @Override
             public void onSensorChanged(SensorEvent event) {
                 _accelerationValues = event.values;
+                setChanged(); // Set the SensorDriver object's observer "changed" status to true
             }
 
             @Override
@@ -50,7 +57,7 @@ public class SensorDriver {
      * Call this method to start monitoring sensors
      */
     public void resumeRecording() {
-        _mSensorManager.registerListener(_mAccelerometerListener, _mAccelerometer, SENSOR_SAMPLING_PERIOD);
+        _mSensorManager.registerListener(_mAccelerometerListener, _mAccelerometer, SENSOR_SAMPLING_PERIOD_US);
         _isRecording = true;
     }
 
