@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
         btnToggleTracking = findViewById(R.id.btnToggleTracking);
 
+        _sendDataToVRClient = new DataTransmitter("192.168.1.8", 1422);
+
         _sensorDriver = new SensorDriver(this);
         _sensorDriver.addObserver(new Observer() {
             @Override
