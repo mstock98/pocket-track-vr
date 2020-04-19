@@ -23,5 +23,7 @@ while True:
     connectionSocket, addr = serverSocket.accept()
     print("Connection established: ", addr)
     while True:
-        command = connectionSocket.recv(2048).decode()
-        print("Command recieved: ", command)
+        data = connectionSocket.recv(2048).decode()
+        if data == "exit":
+            break
+        print("Step count recieved: ", data)

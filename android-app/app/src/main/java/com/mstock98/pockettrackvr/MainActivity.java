@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     TextView lblStepCount;
     private SensorDriver _sensorDriver;
     private MediaPlayer _stepMediaPlayer;
-    private DataTransmitter _sendDataToVRClient;
+    private DataTransmitter _dataTransmitter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnToggleTracking = findViewById(R.id.btnToggleTracking);
 
-        _sendDataToVRClient = new DataTransmitter("192.168.1.8", 1422);
+        _dataTransmitter = new DataTransmitter("192.168.1.8", 1422);
 
         _sensorDriver = new SensorDriver(this);
         _sensorDriver.addObserver(new Observer() {
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 int stepCount = ((SensorDriver) o).getStepCount();
                 lblStepCount.setText("Step Count: " + stepCount);
                 _stepMediaPlayer.start();
-                _sendDataToVRClient.execute(stepCount);
+                _dataTransmitter.transmitStepCount(stepCount);
             }
         });
 
