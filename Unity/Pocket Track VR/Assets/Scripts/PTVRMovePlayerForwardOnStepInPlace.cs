@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using PTVR;
 
 public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour
@@ -17,10 +18,12 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour
 
     void Update()
     {
-        if (_stepReceiver.hasStepsToCollect())
+        int steps;
+
+        if ((steps = _stepReceiver.getNumberOfStepsSinceLastCall()) != 0)
         {
-            int steps = _stepReceiver.getNumberOfStepsSinceLastCall();
             Debug.Log("[PTVR] Steps collected from receiver: " + steps);
+            // Thread.Sleep(0);
         }
     }
 }

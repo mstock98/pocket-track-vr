@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -17,10 +18,12 @@ namespace PTVR
         public PTVRStepReceiver() {
             _stepsSinceLastCollection = 0;
             _hasStepsToCollect = false;
-            new Thread(new ThreadStart(startListeningForSteps)).Start();
+            // new Thread(new ThreadStart(startListeningForSteps)).Start();
         }
 
         public int getNumberOfStepsSinceLastCall() {
+            // Debug.Log("[PTVR] getNumberOfSteps called");
+            processTCPRequests();
             int stepsToReturn = _stepsSinceLastCollection;
             _stepsSinceLastCollection = 0;
             _hasStepsToCollect = false;
@@ -32,25 +35,31 @@ namespace PTVR
         }
 
         // Code based on https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=netframework-4.8
-        public void startListeningForSteps() {
+        IEnumerator processTCPRequests() 
+        {
+            Debug.Log("[PTVR] Setting up TCP server...");
+
             TcpListener server=null;   
-            try
+            
+            IPAddress address = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
+
+            // TcpListener server = new TcpListener(port);
+            server = new TcpListener(address, _RECEIVER_PORT);
+
+            // Start listening for client requests.
+            server.Start();
+
+            Debug.Log("[PTVR] Step receiver listening for data on " + address + ":" + _RECEIVER_PORT);
+
+            // Buffer for reading data
+            Byte[] bytes = new Byte[256];
+
+            // Enter the listening loop.
+            while(true) 
             {
-                IPAddress address = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
+                Debug.Log("[PTVR] Checking for TCP connection requests");
 
-                // TcpListener server = new TcpListener(port);
-                server = new TcpListener(address, _RECEIVER_PORT);
-
-                Debug.Log("[PTVR] Step receiver listening for data on " + address + ":" + _RECEIVER_PORT);
-
-                // Start listening for client requests.
-                server.Start();
-
-                // Buffer for reading data
-                Byte[] bytes = new Byte[256];
-
-                // Enter the listening loop.
-                while(true) 
+                while (server.Pending())
                 {
                     // Perform a blocking call to accept requests.
                     // You could also use server.AcceptSocket() here.
@@ -65,24 +74,16 @@ namespace PTVR
                     {   
                         Debug.Log("[PTVR] Received step");
 
-                        if (!_hasStepsToCollect) {
-                            _hasStepsToCollect = true;
-                        }
+                        _hasStepsToCollect = true;
+
                         _stepsSinceLastCollection++;     
                     }
 
                     // Shutdown and end connection
                     client.Close();
                 }
-            }
-            catch(SocketException e)
-            {
-                Debug.Log("[PTVR] SocketException: " + e.ToString());
-            }
-            finally
-            {
-                // Stop listening for new clients.
-                server.Stop();
+
+                yield return null;
             }
         }
     }
