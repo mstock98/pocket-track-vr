@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         _sensorDriver = new SensorDriver(this);
         _sensorDriver.addObserver(new Observer() {
             @Override
-            public void update(Observable o, Object arg) {
+                public void update(Observable o, Object arg) {
                 int stepCount = ((SensorDriver) o).getStepCount();
                 lblStepCount.setText("Step Count: " + stepCount);
                 _stepMediaPlayer.start();
