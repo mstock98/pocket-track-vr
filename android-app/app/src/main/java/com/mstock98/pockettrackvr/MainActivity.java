@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnToggleTracking = findViewById(R.id.btnToggleTracking);
 
-        _dataTransmitter = new DataTransmitter("192.168.1.8", 1422);
+        _dataTransmitter = new DataTransmitter("fe80::e974:d5ca:9b3f:9c91", 1422);
 
         _sensorDriver = new SensorDriver(this);
         _sensorDriver.addObserver(new Observer() {
