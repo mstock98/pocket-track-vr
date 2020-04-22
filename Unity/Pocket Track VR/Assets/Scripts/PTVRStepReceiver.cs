@@ -14,11 +14,14 @@ namespace PTVR
         private int _stepsSinceLastCollection;
         private bool _hasStepsToCollect;
         private const int _RECEIVER_PORT = 1422;
+        private TcpListener _server;
+        private Byte[] _receiverBuffer;
 
         public PTVRStepReceiver() {
             _stepsSinceLastCollection = 0;
             _hasStepsToCollect = false;
             // new Thread(new ThreadStart(startListeningForSteps)).Start();
+            initializeTCPServer();
         }
 
         public int getNumberOfStepsSinceLastCall() {
@@ -34,56 +37,49 @@ namespace PTVR
             return _hasStepsToCollect;
         }
 
-        // Code based on https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=netframework-4.8
-        IEnumerator processTCPRequests() 
-        {
+        private void initializeTCPServer() {
             Debug.Log("[PTVR] Setting up TCP server...");
-
-            TcpListener server=null;   
             
             IPAddress address = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
 
             // TcpListener server = new TcpListener(port);
-            server = new TcpListener(address, _RECEIVER_PORT);
+            _server = new TcpListener(address, _RECEIVER_PORT);
 
             // Start listening for client requests.
-            server.Start();
+            _server.Start();
 
             Debug.Log("[PTVR] Step receiver listening for data on " + address + ":" + _RECEIVER_PORT);
 
             // Buffer for reading data
-            Byte[] bytes = new Byte[256];
+            _receiverBuffer = new Byte[256];
+        }
 
-            // Enter the listening loop.
-            while(true) 
+        // Code based on https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=netframework-4.8
+        private void processTCPRequests() 
+        {
+            // Debug.Log("[PTVR] Checking for TCP connection requests");
+
+            while (_server.Pending())
             {
-                Debug.Log("[PTVR] Checking for TCP connection requests");
+                // Perform a blocking call to accept requests.
+                // You could also use server.AcceptSocket() here.
+                TcpClient client = _server.AcceptTcpClient();   
 
-                while (server.Pending())
-                {
-                    // Perform a blocking call to accept requests.
-                    // You could also use server.AcceptSocket() here.
-                    TcpClient client = server.AcceptTcpClient();            
-                    Debug.Log("[PTVR] Connection established to Android app");
- 
-                    // Get a stream object for reading and writing
-                    NetworkStream stream = client.GetStream();
+                Debug.Log("[PTVR] Connection established to Android app");
 
-                    // Loop to receive all the steps sent by the client.
-                    while(stream.Read(bytes, 0, 1) != 0) 
-                    {   
-                        Debug.Log("[PTVR] Received step");
+                // Get a stream object for reading and writing
+                NetworkStream stream = client.GetStream();
 
-                        _hasStepsToCollect = true;
-
-                        _stepsSinceLastCollection++;     
-                    }
-
-                    // Shutdown and end connection
-                    client.Close();
+                // Loop to receive all the steps sent by the client.
+                while(stream.Read(_receiverBuffer, 0, 1) != 0) 
+                {   
+                    Debug.Log("[PTVR] Received step");
+                    _hasStepsToCollect = true;
+                    _stepsSinceLastCollection++;     
                 }
 
-                yield return null;
+                // Shutdown and end connection
+                client.Close();
             }
         }
     }
