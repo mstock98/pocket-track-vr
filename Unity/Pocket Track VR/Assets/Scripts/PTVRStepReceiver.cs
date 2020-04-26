@@ -20,12 +20,10 @@ namespace PTVR
         public PTVRStepReceiver() {
             _stepsSinceLastCollection = 0;
             _hasStepsToCollect = false;
-            // new Thread(new ThreadStart(startListeningForSteps)).Start();
             initializeTCPServer();
         }
 
         public int getNumberOfStepsSinceLastCall() {
-            // Debug.Log("[PTVR] getNumberOfSteps called");
             processTCPRequests();
             int stepsToReturn = _stepsSinceLastCollection;
             _stepsSinceLastCollection = 0;
@@ -40,14 +38,21 @@ namespace PTVR
         private void initializeTCPServer() {
             Debug.Log("[PTVR] Setting up TCP server...");
             
-            IPAddress address = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0];
+            var hostName = Dns.GetHostName();
+            Debug.Log("[PTVR] Host name: " + hostName);
+            
+            IPAddress address = Dns.GetHostEntry(hostName).AddressList[1];
 
             // TcpListener server = new TcpListener(port);
+            Debug.Log("[PTVR] Creating TcpListener...");
             _server = new TcpListener(address, _RECEIVER_PORT);
 
             // Start listening for client requests.
+            Debug.Log("[PTVR] Starting TcpListener...");
             _server.Start();
 
+            // address = address.MapToIPv4();
+            
             Debug.Log("[PTVR] Step receiver listening for data on " + address + ":" + _RECEIVER_PORT);
 
             // Buffer for reading data
@@ -61,6 +66,8 @@ namespace PTVR
 
             while (_server.Pending())
             {
+                Debug.Log("[PTVR] Connection pending...");
+
                 // Perform a blocking call to accept requests.
                 // You could also use server.AcceptSocket() here.
                 TcpClient client = _server.AcceptTcpClient();   
@@ -70,8 +77,7 @@ namespace PTVR
                 // Get a stream object for reading and writing
                 NetworkStream stream = client.GetStream();
 
-                // Loop to receive all the steps sent by the client.
-                while(stream.Read(_receiverBuffer, 0, 1) != 0) 
+                if (stream.Read(_receiverBuffer, 0, 256) != 0) 
                 {   
                     Debug.Log("[PTVR] Received step");
                     _hasStepsToCollect = true;

@@ -1,37 +1,43 @@
 package com.mstock98.pockettrackvr;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class DataTransmitter {
     protected String _address;
     protected int _port;
+    protected int _socketTimeout;
 
-    public DataTransmitter(String address, int port) {
+    public DataTransmitter(String address, int port, int socketTimeout) {
         _address = address;
         _port = port;
+        _socketTimeout = socketTimeout;
+
+        Log.v("DataTransmitter", "DataTransmitter created with address: " + address + " and port: " + port);
     }
 
-    private class TransmitTask extends AsyncTask<Integer, Void, Void> {
+    private class TransmitTask extends AsyncTask<Integer, Void, String> {
         @Override
-        protected Void doInBackground(Integer... ints) {
+        protected String doInBackground(Integer... ints) {
             PrintWriter out;
             Socket socketToVRClient;
 
             try {
-                socketToVRClient = new Socket(_address, _port);
+                socketToVRClient = new Socket();
+                InetSocketAddress socketAddress = new InetSocketAddress(_address, _port);
+                socketToVRClient.connect(socketAddress, _socketTimeout);
             } catch (Exception e) {
-                System.out.println("Socket establishment failed: " + e.toString());
-                return null;
+                return "Socket error: " + e.toString();
             }
 
             try {
                 out = new PrintWriter(socketToVRClient.getOutputStream(), true);
             } catch (Exception e) {
-                System.out.println("PrintWriter establishment failed: " + e.toString());
-                return null;
+                return "PrintWriter error: " + e.toString();
             }
 
             out.print(ints[0]);
@@ -39,7 +45,16 @@ public class DataTransmitter {
             out.print("exit");
             out.flush();
 
-            return null;
+            return "Success";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result.equals("Success")) {
+                Log.v("TransmitTask", "Step successfully transmitted");
+            } else {
+                Log.e("TransmitTask", result);
+            }
         }
     }
 
