@@ -66,20 +66,20 @@ namespace PTVR
 
             while (_server.Pending())
             {
-                Debug.Log("[PTVR] Connection pending...");
+                // Debug.Log("[PTVR] Connection pending...");
 
                 // Perform a blocking call to accept requests.
                 // You could also use server.AcceptSocket() here.
                 TcpClient client = _server.AcceptTcpClient();   
 
-                Debug.Log("[PTVR] Connection established to Android app");
+                // Debug.Log("[PTVR] Connection established to Android app");
 
                 // Get a stream object for reading and writing
                 NetworkStream stream = client.GetStream();
 
                 if (stream.Read(_receiverBuffer, 0, 256) != 0) 
                 {   
-                    Debug.Log("[PTVR] Received step");
+                    // Debug.Log("[PTVR] Received step");
                     _hasStepsToCollect = true;
                     _stepsSinceLastCollection++;     
                 }
