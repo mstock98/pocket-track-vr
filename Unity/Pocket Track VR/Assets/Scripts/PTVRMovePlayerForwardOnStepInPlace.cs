@@ -1,4 +1,6 @@
 using UnityEngine;
+// using UnityEngine.VR;
+using UnityEngine.XR;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -10,7 +12,8 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour
     public readonly float DISTANCE_PER_STEP = 1.0f;
     private PTVRStepReceiver _stepReceiver;
     private GameObject _player;
-    private GameObject _playerHead;    
+    private GameObject _playerHead;
+    [SerializeField] XRNode m_VRNode    = XRNode.Head;    
     
     void Start()
     {
@@ -31,27 +34,22 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour
     {
         int steps = 0;
 
-        // Based on https://answers.unity.com/questions/1380893/get-camera-rotation-constrained-to-leftright-ie-ya.html
         if ((steps = _stepReceiver.getNumberOfStepsSinceLastCall()) != 0)
         {
-            // Debug.Log("[PTVR] Steps collected from receiver: " + steps);
-            
-            /* var yaw = _player.transform.rotation.eulerAngles.y;
+            var quaternion  = InputTracking.GetLocalRotation(m_VRNode);
+            var euler = quaternion.eulerAngles;
+            var yaw = euler.y;
+            var adjustedYaw = 90.0f - yaw;
 
-            var direction = new Vector3 (
-                Mathf.Cos(yaw * Mathf.Deg2Rad),
+             var direction = new Vector3 (
+                Mathf.Cos(adjustedYaw * Mathf.Deg2Rad),
                 0f,
-                Mathf.Sin(yaw * Mathf.Deg2Rad)
+                Mathf.Sin(adjustedYaw * Mathf.Deg2Rad)
             );
 
-            _player.transform.position = _player.transform.position + (direction * DISTANCE_PER_STEP * steps); */
+            Debug.Log("[PTVR] Moving in direction: " + direction.x + " " + direction.y + " " + direction.z);
 
-            var forward = new Vector3(_playerHead.transform.position.x, 0f, _playerHead.transform.position.z);
-            forward.Normalize();
-
-            Debug.Log("[PTVR] Moving in direction: " + forward.x + " " + forward.y + " " + forward.z);
-
-            _player.transform.position = _player.transform.position + (forward * DISTANCE_PER_STEP * steps);
+            _player.transform.position = _player.transform.position + (direction * DISTANCE_PER_STEP * steps);
         }
     }
 }
