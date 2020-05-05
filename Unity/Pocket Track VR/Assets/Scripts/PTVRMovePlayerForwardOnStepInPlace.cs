@@ -7,19 +7,25 @@ using System.Text;
 using System.Threading;
 using PTVR;
 
-public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour
-{
+public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
     public readonly float DISTANCE_PER_STEP = 1.0f;
     private PTVRStepReceiver _stepReceiver;
+    private string _stepReceiverAddress;
     private GameObject _player;
     private GameObject _playerHead;
     [SerializeField] XRNode m_VRNode    = XRNode.Head;    
     
-    void Start()
-    {
+    public string GetStepReceiverAddress() {
+        return _stepReceiverAddress;
+    }
+
+    void Start() {
         Debug.Log("[PTVR] Step in place script starting...");
 
         _stepReceiver = new PTVRStepReceiver();
+        _stepReceiverAddress = _stepReceiver.GetIPAddressAndPort();
+
+        Debug.Log("[PTVR] Address according to main script: " + _stepReceiverAddress);
 
         if (((_playerHead = GameObject.Find("ForwardDirection")) == null)) {
             Debug.Log("[PTVR] ERROR: Could not find ForwardDirection");
@@ -30,12 +36,10 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour
         }
     }
 
-    void Update()
-    {
+    void Update() {
         int steps = 0;
 
-        if ((steps = _stepReceiver.getNumberOfStepsSinceLastCall()) != 0)
-        {
+        if ((steps = _stepReceiver.GetNumberOfStepsSinceLastCall()) != 0) {
             var quaternion  = InputTracking.GetLocalRotation(m_VRNode);
             var euler = quaternion.eulerAngles;
             var yaw = euler.y;
