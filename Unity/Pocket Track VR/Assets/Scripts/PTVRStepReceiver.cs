@@ -14,11 +14,12 @@ namespace PTVR
         private int _stepsSinceLastCollection;
         private bool _hasStepsToCollect;
         private IPAddress _address;
-        private const int _RECEIVER_PORT = 1422;
+        private int _receiverPort;
         private TcpListener _server;
         private Byte[] _receiverBuffer;
 
-        public PTVRStepReceiver() {
+        public PTVRStepReceiver(int port) {
+            _receiverPort = port;
             _stepsSinceLastCollection = 0;
             _hasStepsToCollect = false;
             InitializeTCPServer();
@@ -37,7 +38,7 @@ namespace PTVR
         }
 
         public string GetIPAddressAndPort() {
-            return $"{_address}:{_RECEIVER_PORT}";
+            return $"{_address}:{_receiverPort}";
         }
 
         private void InitializeTCPServer() {
@@ -57,13 +58,13 @@ namespace PTVR
             }
             
             // Start TcpListener
-            _server = new TcpListener(_address, _RECEIVER_PORT);
+            _server = new TcpListener(_address, _receiverPort);
             _server.Start();
 
             // Buffer for reading data
             _receiverBuffer = new Byte[256];
             
-            Debug.Log("[PTVR] Step receiver listening for steps on " + _address + ":" + _RECEIVER_PORT + ". Enter this address on the mobile app.");
+            Debug.Log("[PTVR] Step receiver listening for steps on " + _address + ":" + _receiverPort + ". Enter this address on the mobile app.");
         }
 
         // Code based on https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=netframework-4.8

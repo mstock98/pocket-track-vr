@@ -12,12 +12,17 @@ using PTVR;
     Make sure to have this as a component of the OVRPlayerController
 */
 public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
-    [SerializeField] float distancePerStep = 1.0f;
+    [SerializeField] float distancePerStep = 1.0f; // Distance (in meters) that the player will move with each registered step
     private PTVRStepReceiver _stepReceiver;
     private string _stepReceiverAddress;
+    [SerializeField] int stepReceiverPort = 1422;
     private GameObject _player;
     [SerializeField] XRNode _VRNode    = XRNode.Head;    
     
+    /**
+        Gets the IPv4 address and port that the script is listening for step data on
+        :return: address and port formated in a string as XXX.XXX.XXX.XXX:XXXXX
+    */
     public string GetStepReceiverAddress() {
         return _stepReceiverAddress;
     }
@@ -25,7 +30,7 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
     void Start() {
         Debug.Log("[PTVR] Step in place script starting...");
 
-        _stepReceiver = new PTVRStepReceiver();
+        _stepReceiver = new PTVRStepReceiver(stepReceiverPort);
         _stepReceiverAddress = _stepReceiver.GetIPAddressAndPort();
 
         if (((_player = GameObject.Find("OVRCameraRig")) == null)) {
