@@ -1,19 +1,22 @@
 using UnityEngine;
-// using UnityEngine.VR;
 using UnityEngine.XR;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using PTVR;
 
+/**
+    Main PTVR Unity script
+    Make sure to have this as a component of the OVRPlayerController
+*/
 public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
-    public readonly float DISTANCE_PER_STEP = 1.0f;
+    [SerializeField] float distancePerStep = 1.0f;
     private PTVRStepReceiver _stepReceiver;
     private string _stepReceiverAddress;
     private GameObject _player;
-    private GameObject _playerHead;
-    [SerializeField] XRNode m_VRNode    = XRNode.Head;    
+    [SerializeField] XRNode _VRNode    = XRNode.Head;    
     
     public string GetStepReceiverAddress() {
         return _stepReceiverAddress;
@@ -25,14 +28,8 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
         _stepReceiver = new PTVRStepReceiver();
         _stepReceiverAddress = _stepReceiver.GetIPAddressAndPort();
 
-        Debug.Log("[PTVR] Address according to main script: " + _stepReceiverAddress);
-
-        if (((_playerHead = GameObject.Find("ForwardDirection")) == null)) {
-            Debug.Log("[PTVR] ERROR: Could not find ForwardDirection");
-        }
-
         if (((_player = GameObject.Find("OVRCameraRig")) == null)) {
-            Debug.Log("[PTVR] ERROR: Could not find OVRCameraRig");
+            throw new Exception("[PTVR] Could not find OVRCameraRig");
         }
     }
 
@@ -40,7 +37,7 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
         int steps = 0;
 
         if ((steps = _stepReceiver.GetNumberOfStepsSinceLastCall()) != 0) {
-            var quaternion  = InputTracking.GetLocalRotation(m_VRNode);
+            var quaternion  = InputTracking.GetLocalRotation(_VRNode);
             var euler = quaternion.eulerAngles;
             var yaw = euler.y;
             var adjustedYaw = 90.0f - yaw;
@@ -53,7 +50,7 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
 
             Debug.Log("[PTVR] Moving in direction: " + direction.x + " " + direction.y + " " + direction.z);
 
-            _player.transform.position = _player.transform.position + (direction * DISTANCE_PER_STEP * steps);
+            _player.transform.position = _player.transform.position + (direction * distancePerStep * steps);
         }
     }
 }

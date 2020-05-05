@@ -68,22 +68,15 @@ namespace PTVR
 
         // Code based on https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=netframework-4.8
         private void ProcessTCPRequests() {
-            // Debug.Log("[PTVR] Checking for TCP connection requests");
-
             while (_server.Pending()) {
-                // Debug.Log("[PTVR] Connection pending...");
-
-                // Perform a blocking call to accept requests.
-                // You could also use server.AcceptSocket() here.
+                // This call should be non-blocking because of _server.Pending() being true
                 TcpClient client = _server.AcceptTcpClient();   
-
-                // Debug.Log("[PTVR] Connection established to Android app");
 
                 // Get a stream object for reading and writing
                 NetworkStream stream = client.GetStream();
 
+                // If there's any data waiting to be read for the TCP connection
                 if (stream.Read(_receiverBuffer, 0, 256) != 0) {   
-                    // Debug.Log("[PTVR] Received step");
                     _hasStepsToCollect = true;
                     _stepsSinceLastCollection++;     
                 }
