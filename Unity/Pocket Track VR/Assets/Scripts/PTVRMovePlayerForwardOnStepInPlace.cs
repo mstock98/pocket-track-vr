@@ -21,12 +21,15 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
     
     /**
         Gets the IPv4 address and port that the script is listening for step data on
-        :return: address and port formated in a string as XXX.XXX.XXX.XXX:XXXXX
+        :return: address and port formated in a string as "#.#.#.#:<port number>"
     */
     public string GetStepReceiverAddress() {
         return _stepReceiverAddress;
     }
 
+    /**
+        Script setup. Initializes a PTVRStepReceiver and locates an OVRCameraRig.
+    */
     void Start() {
         Debug.Log("[PTVR] Step in place script starting...");
 
@@ -38,6 +41,10 @@ public class PTVRMovePlayerForwardOnStepInPlace : MonoBehaviour {
         }
     }
 
+    /**
+        Method that is called every frame to move the player according
+        to how many steps were detected since last frame.
+    */
     void Update() {
         int steps = 0;
 
