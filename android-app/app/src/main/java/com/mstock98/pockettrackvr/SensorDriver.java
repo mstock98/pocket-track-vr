@@ -10,6 +10,10 @@ import java.util.Observable;
 
 import static android.content.Context.SENSOR_SERVICE;
 
+/**
+ * Interfaces with the Android hardware sensors (pedometer for now)
+ * Alerts observers when a step is detected
+ */
 public class SensorDriver extends Observable {
     private final SensorManager _mSensorManager;
 
@@ -17,7 +21,7 @@ public class SensorDriver extends Observable {
 
     private final SensorEventListener _mStepDetectorListener;
 
-    private final int SENSOR_SAMPLING_PERIOD_US = 8333; // 8333 microseconds ~= 120 Hz sample rate
+    private final int _SENSOR_SAMPLING_PERIOD_US = 8333; // 8333 microseconds ~= 120 Hz sample rate
 
     private int _stepCount; // number of steps that have been taken since the start of recording
 
@@ -48,15 +52,15 @@ public class SensorDriver extends Observable {
     }
 
     /**
-     * Call this method to start monitoring sensors
+     * Call this method to start monitoring the pedometer
      */
     public void resumeRecording() {
-        _mSensorManager.registerListener(_mStepDetectorListener, _mStepDetector, SENSOR_SAMPLING_PERIOD_US);
+        _mSensorManager.registerListener(_mStepDetectorListener, _mStepDetector, _SENSOR_SAMPLING_PERIOD_US);
         _isRecording = true;
     }
 
     /**
-     * Call this method when sensors aren't needed/app is minimized - to save on battery
+     * Call this method when the pedometer isn't needed/app is minimized - to save on battery
      */
     public void pauseRecording() {
         _mSensorManager.unregisterListener(_mStepDetectorListener);
@@ -69,8 +73,10 @@ public class SensorDriver extends Observable {
      */
     public boolean isRecording() { return _isRecording; }
 
-
-    // Returns number of steps that have been taken since the start of recording
+    /**
+     * Gets the number of steps that have been recorded since the object was created
+     * @return step count
+     */
     public int getStepCount() {
         return _stepCount;
     }

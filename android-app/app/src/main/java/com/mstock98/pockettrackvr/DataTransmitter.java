@@ -7,11 +7,21 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+/**
+ * Handles data transmission to the VR client
+ */
 public class DataTransmitter {
     protected String _address;
     protected int _port;
     protected int _socketTimeout;
 
+    /**
+     * Constructor for the DataTransmitter class
+     * @param address - the IP address of the VR client
+     * @param port - the port of the VR client
+     * @param socketTimeout - the time (milliseconds) that the DataTransmitter should wait before a
+     *                        step transmission is deemed unsuccessful
+     */
     public DataTransmitter(String address, int port, int socketTimeout) {
         _address = address;
         _port = port;
@@ -20,7 +30,16 @@ public class DataTransmitter {
         Log.v("DataTransmitter", "DataTransmitter created with address: " + address + " and port: " + port);
     }
 
+    /**
+     * Asynchronous transmission task that gets created with every call of transmitStepCount()
+     */
     private class TransmitTask extends AsyncTask<Integer, Void, String> {
+
+        /**
+         * Main background transmission task. This gets called on execute()
+         * @param ints - step count to send to the VR client
+         * @return success status for logging
+         */
         @Override
         protected String doInBackground(Integer... ints) {
             PrintWriter out;
@@ -48,6 +67,10 @@ public class DataTransmitter {
             return "Success";
         }
 
+        /**
+         * Logs the result of the TransmitTask
+         * @param result - TransmitTask result
+         */
         @Override
         protected void onPostExecute(String result) {
             if (result.equals("Success")) {
@@ -58,6 +81,10 @@ public class DataTransmitter {
         }
     }
 
+    /**
+     * Main method to call in order to send a step to the VR client
+     * @param stepCount - step count to send to the VR client
+     */
     public Void transmitStepCount(int stepCount) {
         TransmitTask task = new TransmitTask();
         task.execute(stepCount);
