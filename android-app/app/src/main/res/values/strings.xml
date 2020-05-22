@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Pocket Track VR</string>
+    <string name="step_count">Step count: %d</string>
+    <string name="btn_toggle_tracking_start">Start tracking</string>
+    <string name="btn_toggle_tracking_stop">Stop tracking</string>
+    <string name="btn_change_address">Change address and port</string>
+    <string name="ip_input_title">Enter IP address of VR client</string>
+    <string name="port_input_title">Enter port of VR client</string>
+    <string name="btn_ok">OK</string>
 </resources>
